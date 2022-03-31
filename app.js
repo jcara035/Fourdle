@@ -1,7 +1,8 @@
 const tileDisplay = document.querySelector('.tile-container')
 const keyboard = document.querySelector('.key-container')
 
-const fourdle = 'four'
+const fourdle = 'FOUR'
+let gameInProgress = true
 const keys = [
     'Q',
     'W',
@@ -57,15 +58,18 @@ guessRows.forEach((guessRow,guessRowIndex) => {
 })
 
 const handleClick = (key) => {
-    console.log('clicked', key)
-    if (key == '<<') {
-        removeLetter()
-    }else if (key == 'ENTER') {
-        submitGuess()
+    if (gameInProgress) {
+        console.log('clicked', key)
+        if (key == '<<') {
+            removeLetter()
+        }else if (key == 'ENTER') {
+            submitGuess()
+        }
+        else {
+            addLetter(key)
+        }
     }
-    else {
-        addLetter(key)
-    }
+    
     
 }
 
@@ -81,7 +85,10 @@ const addLetter = (letter) => {
     if (currentTile < 4 ) {
         const tile = document.getElementById('guessRow-' + currentRow + '-tile-' + currentTile)
         tile.textContent = letter
+        guessRows[currentRow][currentTile] = letter
+        tile.setAttribute('data', letter)
         currentTile++
+        console.log('guessRows', guessRows)
     } 
 }
 
@@ -89,14 +96,33 @@ const removeLetter = () => {
     if (currentTile > 0) {
         currentTile--
         const tile = document.getElementById('guessRow-' + currentRow + '-tile-' + currentTile)
-        tile.textContent = ' '
+        tile.textContent = ''
+        guessRows[currentRow][currentTile] = ''
+        tile.setAttribute('data', '')
+
         
     }
 }
 
 const submitGuess = () => {
-    if (currentRow < 5) {
-        currentRow++
-        currentTile = 0
+    if (currentTile == 4) {
+        const guess = guessRows[currentRow].join('')
+        console.log("guess is "+ guess + ", fourdle is " + fourdle)
+        if (guess == fourdle) {
+            console.log("correct guess, you win in " + (currentRow + 1) + " tries!")
+            gameInProgress = false;
+
+        } else {
+            if (currentRow < 5) {
+                currentRow++
+                currentTile = 0
+            } else {
+                console.log("game lost, correct word was " + fourdle)
+                gameInProgress = false;
+            }
+        }
+    } else {
+        console.log("not enough letters in guess")
     }
+    
 }
