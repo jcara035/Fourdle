@@ -1,5 +1,6 @@
 const tileDisplay = document.querySelector('.tile-container')
 const keyboard = document.querySelector('.key-container')
+const messageDisplay = document.querySelector('.message-container')
 
 const fourdle = 'FOUR'
 let gameInProgress = true
@@ -108,7 +109,20 @@ const submitGuess = () => {
     if (currentTile == 4) {
         const guess = guessRows[currentRow].join('')
         console.log("guess is "+ guess + ", fourdle is " + fourdle)
+
+        guessRows[currentRow].forEach((letter, index) => {
+            if (letter == fourdle.charAt(index)) {
+                console.log("letter " + letter + " in correct position")
+            } else if (fourdle.includes(letter)){
+                console.log("letter " + letter + " in wrong position")
+            } else {
+                console.log("letter " + letter + " not in fourdle")
+            }
+        })
+
+
         if (guess == fourdle) {
+            showMessage("You Win!")
             console.log("correct guess, you win in " + (currentRow + 1) + " tries!")
             gameInProgress = false;
 
@@ -117,6 +131,7 @@ const submitGuess = () => {
                 currentRow++
                 currentTile = 0
             } else {
+                showMessage("Game Over, Correct word was " + fourdle)
                 console.log("game lost, correct word was " + fourdle)
                 gameInProgress = false;
             }
@@ -125,4 +140,11 @@ const submitGuess = () => {
         console.log("not enough letters in guess")
     }
     
+}
+
+const showMessage = (message) => {
+    const messageElement = document.createElement('p')
+    messageElement.textContent = message
+    messageDisplay.append(messageElement)
+    setTimeout(() => messageDisplay.removeChild(messageElement), 2000)
 }
