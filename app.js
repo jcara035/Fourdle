@@ -108,18 +108,9 @@ const removeLetter = () => {
 const submitGuess = () => {
     if (currentTile == 4) {
         const guess = guessRows[currentRow].join('')
-        console.log("guess is "+ guess + ", fourdle is " + fourdle)
-
-        guessRows[currentRow].forEach((letter, index) => {
-            if (letter == fourdle.charAt(index)) {
-                console.log("letter " + letter + " in correct position")
-            } else if (fourdle.includes(letter)){
-                console.log("letter " + letter + " in wrong position")
-            } else {
-                console.log("letter " + letter + " not in fourdle")
-            }
-        })
-
+        console.log("guess is "+ guess + ", fourdle is " + fourdle)    
+        
+        flipTile()
 
         if (guess == fourdle) {
             showMessage("You Win!")
@@ -147,4 +138,41 @@ const showMessage = (message) => {
     messageElement.textContent = message
     messageDisplay.append(messageElement)
     setTimeout(() => messageDisplay.removeChild(messageElement), 2000)
+}
+
+const flipTile = () => {
+    const rowTiles = document.querySelector('#guessRow-' + currentRow).childNodes
+    let checkFourdle = fourdle
+    const guess = []
+
+    rowTiles.forEach(tile => {
+        guess.push({ letter: tile.getAttribute('data'), color: 'grey-overlay'})
+    })
+
+    guess.forEach((guess, index) => {
+        if (guess.letter == fourdle[index]) {
+            guess.color = 'green-overlay'
+            checkFourdle = checkFourdle.replace(guess.letter, '')
+        }
+    })
+
+    guess.forEach(guess => {
+        if (checkFourdle.includes(guess.letter)) {
+            guess.color = 'yellow-overlay'
+            checkFourdle = checkFourdle.replace(guess.letter = '')
+        }
+    })
+    
+    rowTiles.forEach((tile, index) => {
+        setTimeout(() => {
+            tile.classList.add('flip')
+            tile.classList.add(guess[index].color)
+            addColorToKey(guess[index].letter, guess[index].color)
+        }, 500 * index)
+    })        
+}
+
+const addColorToKey = (dataLetter, color) => {
+    const key = document.getElementById(dataLetter)
+    key.classList.add(color)
 }
