@@ -2,8 +2,18 @@ const tileDisplay = document.querySelector('.tile-container')
 const keyboard = document.querySelector('.key-container')
 const messageDisplay = document.querySelector('.message-container')
 
-const fourdle = 'FOUR'
+let fourdle = 'FOUR'
 let gameInProgress = true
+const getFourdle = () => {
+    fetch('http://localhost:8000/word')
+        .then(response => response.json())
+        .then(json => {
+            fourdle = json.toUpperCase()
+        })
+        .catch(err => console.log(err))
+}
+
+getFourdle()
 const keys = [
     'Q',
     'W',
@@ -108,27 +118,35 @@ const removeLetter = () => {
 const submitGuess = () => {
     if (currentTile == 4) {
         const guess = guessRows[currentRow].join('')
-        console.log("guess is "+ guess + ", fourdle is " + fourdle)    
-        
-        flipTile()
 
-        if (guess == fourdle) {
-            showMessage("You Win!")
-            console.log("correct guess, you win in " + (currentRow + 1) + " tries!")
-            gameInProgress = false;
-
-        } else {
-            if (currentRow < 5) {
-                currentRow++
-                currentTile = 0
-            } else {
-                showMessage("Game Over, Correct word was " + fourdle)
-                console.log("game lost, correct word was " + fourdle)
-                gameInProgress = false;
-            }
-        }
+        fetch(`http://localhost:8000/check/?word=${guess}`)
+            .then(response => response.json())
+            .then(json => {
+                console.log(json)
+                if (json == 462) {
+                    showMessage('Not in Word List')
+                    return
+                } else {
+                    console.log("guess is "+ guess + ", fourdle is " + fourdle)           
+                    flipTile()           
+                    if (guess == fourdle) {
+                        showMessage("You Win!")
+                        console.log("correct guess, you win in " + (currentRow + 1) + " tries!")
+                        gameInProgress = false;
+                    } else {
+                        if (currentRow < 5) {
+                            currentRow++
+                            currentTile = 0
+                        } else {
+                            showMessage("Game Over, Correct word was " + fourdle)
+                            console.log("game lost, correct word was " + fourdle)
+                            gameInProgress = false;
+                        }
+                    }
+                }
+            }).catch(err => console.log(err))
     } else {
-        console.log("not enough letters in guess")
+        showMessage("Not Enough Letters")
     }
     
 }
@@ -142,12 +160,15 @@ const showMessage = (message) => {
 
 const flipTile = () => {
     const rowTiles = document.querySelector('#guessRow-' + currentRow).childNodes
+    console.log('rowTiles',rowTiles)
     let checkFourdle = fourdle
     const guess = []
 
     rowTiles.forEach(tile => {
         guess.push({ letter: tile.getAttribute('data'), color: 'grey-overlay'})
     })
+
+    
 
     guess.forEach((guess, index) => {
         if (guess.letter == fourdle[index]) {
@@ -167,9 +188,9 @@ const flipTile = () => {
         setTimeout(() => {
             tile.classList.add('flip')
             tile.classList.add(guess[index].color)
-            addColorToKey(guess[index].letter, guess[index].color)
+            addColorToKey(tile.getAttribute('data'), guess[index].color)
         }, 500 * index)
-    })        
+    })    
 }
 
 const addColorToKey = (dataLetter, color) => {
